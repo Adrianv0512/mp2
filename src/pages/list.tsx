@@ -52,6 +52,7 @@ function List() {
 
     return sortOrder === 'ascending' ? comparison : -comparison
   })
+  const mealIds = sortedMeals.map((meal) => meal.idMeal)
 
   return (
     <>
@@ -95,9 +96,12 @@ function List() {
 
       {!isLoading && !error && sortedMeals.length > 0 && (
         <ul>
-          {sortedMeals.map((meal) => (
+          {sortedMeals.map((meal, index) => (
             <li key={meal.idMeal}>
-              <Link to={`/meal/${meal.idMeal}`}>
+              <Link
+                to={`/meal/${meal.idMeal}`}
+                state={{ mealIds, currentIndex: index }}
+              >
                 <img
                   src={meal.strMealThumb}
                   alt={meal.strMeal}

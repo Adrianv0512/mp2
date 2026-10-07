@@ -86,6 +86,8 @@ function Gallery() {
     }
   }, [selectedCategory])
 
+  const mealIds = meals.map((meal) => meal.idMeal)
+
   return (
     <>
       <h1>Gallery Page</h1>
@@ -118,9 +120,12 @@ function Gallery() {
 
       {!isLoading && !error && meals.length > 0 && (
         <ul className="gallery-grid">
-          {meals.map((meal) => (
+          {meals.map((meal, index) => (
             <li className="gallery-card" key={meal.idMeal}>
-              <Link to={`/meal/${meal.idMeal}`}>
+              <Link
+                to={`/meal/${meal.idMeal}`}
+                state={{ mealIds, currentIndex: index }}
+              >
                 <img src={meal.strMealThumb} alt={meal.strMeal} />
                 <h2>{meal.strMeal}</h2>
               </Link>
