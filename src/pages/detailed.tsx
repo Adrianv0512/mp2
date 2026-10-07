@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { getMealById } from '../api/mealdbApi'
+import { getMealById, searchMeals } from '../api/mealdbApi'
 import type {
   IngredientKey,
   IngredientNumber,
@@ -16,6 +16,58 @@ interface MealNavigationState {
 interface IngredientItem {
   ingredient: string
   measure: string
+}
+
+const NAVIGATION_STORAGE_KEY = 'meal-navigation-state'
+
+function getNavigationStateForMeal(
+  value: unknown,
+  mealId: string,
+): MealNavigationState | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  const possibleState = value as Partial<MealNavigationState>
+
+  if (
+    !Array.isArray(possibleState.mealIds) ||
+    !possibleState.mealIds.every((savedId) => typeof savedId === 'string') ||
+    typeof possibleState.currentIndex !== 'number'
+  ) {
+    return null
+  }
+
+  const currentIndex = possibleState.mealIds.indexOf(mealId)
+
+  if (currentIndex === -1) {
+    return null
+  }
+
+  return {
+    mealIds: possibleState.mealIds,
+    currentIndex,
+  }
+}
+
+function readSavedNavigationState(
+  mealId: string,
+): MealNavigationState | null {
+  try {
+    const savedValue = sessionStorage.getItem(NAVIGATION_STORAGE_KEY)
+
+    if (!savedValue) {
+      return null
+    }
+
+    return getNavigationStateForMeal(JSON.parse(savedValue), mealId)
+  } catch {
+    return null
+  }
+}
+
+function saveNavigationState(state: MealNavigationState) {
+  sessionStorage.setItem(NAVIGATION_STORAGE_KEY, JSON.stringify(state))
 }
 
 function getIngredients(meal: Meal): IngredientItem[] {
@@ -44,12 +96,73 @@ function Detailed() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [isNotFound, setIsNotFound] = useState(false)
+  const [fallbackNavigationState, setFallbackNavigationState] =
+    useState<MealNavigationState | null>(null)
 
-  const navigationState = location.state as MealNavigationState | null
+  const routeNavigationState = id
+    ? getNavigationStateForMeal(location.state, id)
+    : null
+  const savedNavigationState = id
+    ? readSavedNavigationState(id)
+    : null
+  const matchingFallbackState = id
+    ? getNavigationStateForMeal(fallbackNavigationState, id)
+    : null
+  const navigationState =
+    routeNavigationState ?? matchingFallbackState ?? savedNavigationState
   const mealIds = navigationState?.mealIds ?? []
   const currentIndex = navigationState?.currentIndex ?? -1
   const hasPrevious = currentIndex > 0
   const hasNext = currentIndex >= 0 && currentIndex < mealIds.length - 1
+
+  useEffect(() => {
+    if (!id) {
+      return
+    }
+
+    const mealId = id
+    const navigationFromRoute = getNavigationStateForMeal(
+      location.state,
+      mealId,
+    )
+
+    if (navigationFromRoute) {
+      saveNavigationState(navigationFromRoute)
+      return
+    }
+
+    if (readSavedNavigationState(mealId)) {
+      return
+    }
+
+    let ignoreResult = false
+
+    async function loadDefaultNavigationState() {
+      try {
+        const returnedMeals = await searchMeals('')
+        const defaultState = getNavigationStateForMeal(
+          {
+            mealIds: returnedMeals.map((returnedMeal) => returnedMeal.idMeal),
+            currentIndex: 0,
+          },
+          mealId,
+        )
+
+        if (!ignoreResult && defaultState) {
+          setFallbackNavigationState(defaultState)
+          saveNavigationState(defaultState)
+        }
+      } catch {
+        // The meal detail can still render if fallback navigation cannot load.
+      }
+    }
+
+    void loadDefaultNavigationState()
+
+    return () => {
+      ignoreResult = true
+    }
+  }, [id, location.state])
 
   useEffect(() => {
     if (!id) {
