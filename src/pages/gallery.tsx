@@ -89,33 +89,42 @@ function Gallery() {
   const mealIds = meals.map((meal) => meal.idMeal)
 
   return (
-    <>
-      <h1>Gallery Page</h1>
-
-      <div className="gallery-controls">
-        <label htmlFor="meal-category">Category</label>
-        <select
-          id="meal-category"
-          value={selectedCategory}
-          onChange={(event) => setSelectedCategory(event.target.value)}
-          disabled={categories.length === 0}
-        >
-          {categories.map((category) => (
-            <option
-              key={category.strCategory}
-              value={category.strCategory}
-            >
-              {category.strCategory}
-            </option>
-          ))}
-        </select>
+    <section className="page gallery-page">
+      <div className="page-heading">
+        <h1>Gallery Page</h1>
+        <p>Browse meals by category.</p>
       </div>
 
-      {isLoading && <p>Loading meals...</p>}
-      {error && <p role="alert">{error}</p>}
+      <div className="gallery-controls">
+        <h2>Filter by category</h2>
+        <div className="category-filters" aria-label="Meal categories">
+          {categories.map((category) => (
+            <button
+              type="button"
+              className={
+                selectedCategory === category.strCategory
+                  ? 'category-button active'
+                  : 'category-button'
+              }
+              key={category.strCategory}
+              onClick={() => setSelectedCategory(category.strCategory)}
+              aria-pressed={selectedCategory === category.strCategory}
+            >
+              {category.strCategory}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isLoading && <p className="status-message">Loading meals...</p>}
+      {error && (
+        <p className="status-message error-message" role="alert">
+          {error}
+        </p>
+      )}
 
       {!isLoading && !error && meals.length === 0 && (
-        <p>No meals found for this category.</p>
+        <p className="status-message">No meals found for this category.</p>
       )}
 
       {!isLoading && !error && meals.length > 0 && (
@@ -123,6 +132,7 @@ function Gallery() {
           {meals.map((meal, index) => (
             <li className="gallery-card" key={meal.idMeal}>
               <Link
+                className="gallery-card-link"
                 to={`/meal/${meal.idMeal}`}
                 state={{ mealIds, currentIndex: index }}
               >
@@ -133,7 +143,7 @@ function Gallery() {
           ))}
         </ul>
       )}
-    </>
+    </section>
   )
 }
 

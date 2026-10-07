@@ -55,67 +55,85 @@ function List() {
   const mealIds = sortedMeals.map((meal) => meal.idMeal)
 
   return (
-    <>
-      <h1>List Page</h1>
+    <section className="page list-page">
+      <div className="page-heading">
+        <h1>List Page</h1>
+        <p>Search for a meal and sort the results.</p>
+      </div>
 
-      <label htmlFor="meal-search">Search meals</label>
-      <input
-        id="meal-search"
-        type="search"
-        placeholder="Try pasta, curry, or soup"
-        value={searchQuery}
-        onChange={(event) => setSearchQuery(event.target.value)}
-      />
+      <div className="list-controls">
+        <div className="form-field search-field">
+          <label htmlFor="meal-search">Search meals</label>
+          <input
+            id="meal-search"
+            type="search"
+            placeholder="Try pasta, curry, or soup"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
+        </div>
 
-      <label htmlFor="sort-by">Sort by</label>
-      <select
-        id="sort-by"
-        value={sortBy}
-        onChange={(event) => setSortBy(event.target.value as SortBy)}
-      >
-        <option value="strMeal">Name</option>
-        <option value="strCategory">Category</option>
-      </select>
+        <div className="form-field">
+          <label htmlFor="sort-by">Sort by</label>
+          <select
+            id="sort-by"
+            value={sortBy}
+            onChange={(event) => setSortBy(event.target.value as SortBy)}
+          >
+            <option value="strMeal">Name</option>
+            <option value="strCategory">Category</option>
+          </select>
+        </div>
 
-      <label htmlFor="sort-order">Sort order</label>
-      <select
-        id="sort-order"
-        value={sortOrder}
-        onChange={(event) => setSortOrder(event.target.value as SortOrder)}
-      >
-        <option value="ascending">Ascending</option>
-        <option value="descending">Descending</option>
-      </select>
+        <div className="form-field">
+          <label htmlFor="sort-order">Sort order</label>
+          <select
+            id="sort-order"
+            value={sortOrder}
+            onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+          >
+            <option value="ascending">Ascending</option>
+            <option value="descending">Descending</option>
+          </select>
+        </div>
+      </div>
 
-      {isLoading && <p>Loading meals...</p>}
-      {error && <p role="alert">{error}</p>}
+      {isLoading && <p className="status-message">Loading meals...</p>}
+      {error && (
+        <p className="status-message error-message" role="alert">
+          {error}
+        </p>
+      )}
 
       {!isLoading && !error && sortedMeals.length === 0 && (
-        <p>No meals found.</p>
+        <p className="status-message">No meals found.</p>
       )}
 
       {!isLoading && !error && sortedMeals.length > 0 && (
-        <ul>
+        <ul className="meal-list">
           {sortedMeals.map((meal, index) => (
-            <li key={meal.idMeal}>
+            <li className="meal-list-card" key={meal.idMeal}>
               <Link
+                className="meal-list-card-link"
                 to={`/meal/${meal.idMeal}`}
                 state={{ mealIds, currentIndex: index }}
               >
                 <img
+                  className="meal-list-image"
                   src={meal.strMealThumb}
                   alt={meal.strMeal}
-                  width="160"
                 />
-                <h2>{meal.strMeal}</h2>
-                <p>Category: {meal.strCategory}</p>
-                <p>Cuisine: {meal.strArea}</p>
+                <div className="meal-list-content">
+                  <h2>{meal.strMeal}</h2>
+                  <p><strong>Category:</strong> {meal.strCategory}</p>
+                  <p><strong>Cuisine:</strong> {meal.strArea}</p>
+                </div>
               </Link>
             </li>
           ))}
         </ul>
       )}
-    </>
+    </section>
   )
 }
 

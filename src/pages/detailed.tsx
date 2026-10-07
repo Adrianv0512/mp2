@@ -221,41 +221,64 @@ function Detailed() {
   const ingredients = meal ? getIngredients(meal) : []
 
   return (
-    <>
-      <h1>Meal Details</h1>
+    <section className="page detail-page">
+      <div className="page-heading">
+        <h1>Meal Details</h1>
+      </div>
 
-      {!id && <p role="alert">No meal ID was provided.</p>}
-      {isLoading && <p>Loading meal...</p>}
-      {error && <p role="alert">{error}</p>}
-      {isNotFound && <p>Meal not found.</p>}
+      {!id && (
+        <p className="status-message error-message" role="alert">
+          No meal ID was provided.
+        </p>
+      )}
+      {isLoading && <p className="status-message">Loading meal...</p>}
+      {error && (
+        <p className="status-message error-message" role="alert">
+          {error}
+        </p>
+      )}
+      {isNotFound && <p className="status-message">Meal not found.</p>}
 
       {!isLoading && !error && meal && (
-        <article>
-          <h2>{meal.strMeal}</h2>
-          <img src={meal.strMealThumb} alt={meal.strMeal} width="320" />
-          <p>Category: {meal.strCategory}</p>
-          <p>Cuisine: {meal.strArea}</p>
+        <article className="detail-card">
+          <div className="detail-layout">
+            <img
+              className="detail-image"
+              src={meal.strMealThumb}
+              alt={meal.strMeal}
+            />
 
-          <h3>Ingredients</h3>
-          {ingredients.length > 0 ? (
-            <ul>
-              {ingredients.map(({ ingredient, measure }, index) => (
-                <li key={`${ingredient}-${index}`}>
-                  {measure ? `${measure} ` : ''}
-                  {ingredient}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No ingredients are available.</p>
-          )}
+            <div className="detail-content">
+              <h2>{meal.strMeal}</h2>
+              <div className="detail-meta">
+                <p><strong>Category:</strong> {meal.strCategory}</p>
+                <p><strong>Cuisine:</strong> {meal.strArea}</p>
+              </div>
 
-          <h3>Instructions</h3>
-          <p>{meal.strInstructions}</p>
+              <h3>Ingredients</h3>
+              {ingredients.length > 0 ? (
+                <ul className="ingredient-list">
+                  {ingredients.map(({ ingredient, measure }, index) => (
+                    <li key={`${ingredient}-${index}`}>
+                      {measure ? `${measure} ` : ''}
+                      {ingredient}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No ingredients are available.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="instructions-section">
+            <h3>Instructions</h3>
+            <p>{meal.strInstructions}</p>
+          </div>
         </article>
       )}
 
-      <div>
+      <div className="detail-navigation">
         <button
           type="button"
           onClick={() => goToMeal(currentIndex - 1)}
@@ -271,7 +294,7 @@ function Detailed() {
           Next
         </button>
       </div>
-    </>
+    </section>
   )
 }
 
