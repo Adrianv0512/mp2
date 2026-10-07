@@ -22,7 +22,7 @@ function List() {
       setError('')
 
       try {
-        const query = searchQuery.trim() || 'chicken'
+        const query = searchQuery.trim()
         const returnedMeals = await searchMeals(query)
 
         if (!ignoreResult) {
